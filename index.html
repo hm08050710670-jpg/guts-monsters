@@ -225,54 +225,90 @@ function cameraTarget(){const m=MAPS[state.scene],p=state.player;return {x:m.w*T
 function snapCamera(){camera=cameraTarget()}
 
 function drawPlayerSprite(ctx,x,y,face,fr,gender){
-  // 16x24-ish original pixel sprite: same greige hoodie/black pants/white shoes,
-  // male = rounded mash, female = long hair. No red cap.
-  const P=(px,py,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x+px),Math.round(y+py),w,h)};
-  const skin='#e9b994', hair='#292725', hairHi='#3a3632', outline='#3b3733';
-  const hoodie='#c9c1b4', hoodieHi='#ddd5c8', hoodieDark='#8d877e';
-  const pants='#222827', shoe='#f1eee4', sole='#aeb3ac';
-  const bob=(fr%2===0?0:1);
+  // R07: 24x32 high-density field sprite, still rendered pixel-perfect.
+  // Male: rounded mash. Female: long hair. Matching greige hoodie / black pants / white shoes.
+  const S=1;
+  const P=(px,py,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x+px*S),Math.round(y+py*S),w*S,h*S)};
+  const skin='#efbf9a', skinSh='#c98f73', hair='#272523', hair2='#3c3733', hair3='#554a42';
+  const ink='#302e2b', hoodie='#c8bfb2', hoodieHi='#e2d9cd', hoodieSh='#928a80';
+  const pants='#202625', pantsHi='#343b39', shoe='#f6f1e7', sole='#a9afa9', eye='#252726';
+  const step=fr?1:0;
 
-  // shadow
-  P(3,22,12,2,'rgba(25,42,35,.24)');
+  // soft pixel shadow
+  P(3,29,18,2,'rgba(24,39,33,.22)'); P(6,31,12,1,'rgba(24,39,33,.12)');
 
-  if(face==='up'){
-    // long hair is drawn behind the body
-    if(gender==='female'){P(3,3,12,15,hair);P(2,8,3,12,hair);P(13,8,3,12,hair)}
-    // head / hair
-    P(4,3,10,9,skin); P(3,2,12,6,hair); P(4,1,10,2,hair);
-    if(gender==='male'){P(3,5,2,5,hair);P(13,5,2,5,hair);P(5,7,8,3,hair)}
-    else {P(2,5,3,10,hair);P(13,5,3,10,hair)}
-    // hoodie back
-    P(4,11,10,8,outline);P(5,11,8,7,hoodie);P(7,11,4,2,hoodieHi);
-    P(3,12,2,6,hoodieDark);P(13,12,2,6,hoodieDark);
-  }else{
-    if(gender==='female'){P(3,3,12,16,hair);P(2,7,3,12,hair);P(13,7,3,12,hair)}
-    P(4,3,10,9,skin);
-    // rounded mash silhouette
-    P(3,2,12,5,hair);P(4,1,10,2,hair);P(3,5,3,5,hair);P(12,5,3,5,hair);
-    if(gender==='male'){P(5,6,2,3,hair);P(8,6,2,2,hair);P(11,6,2,3,hair)}
-    else {P(2,6,3,11,hair);P(13,6,3,11,hair);P(4,10,2,7,hair);P(12,10,2,7,hair)}
-    // face pixels
-    if(face==='left'){P(5,8,1,1,'#2a2927');P(4,10,2,1,'#d58f78')}
-    else if(face==='right'){P(12,8,1,1,'#2a2927');P(12,10,2,1,'#d58f78')}
-    else {P(6,8,1,1,'#2a2927');P(11,8,1,1,'#2a2927');P(8,10,2,1,'#d58f78')}
-    // hoodie
-    P(4,11,10,8,outline);P(5,11,8,7,hoodie);P(6,12,6,2,hoodieHi);
-    P(3,12,2,6,hoodieDark);P(13,12,2,6,hoodieDark);
-    // hoodie strings
-    if(face==='down'){P(7,13,1,3,'#4b504d');P(10,13,1,3,'#4b504d')}
+  // hair behind body for female
+  if(gender==='female'){
+    if(face==='up'){P(4,5,16,20,hair);P(3,9,3,15,hair2);P(19,9,3,15,hair2);P(5,21,4,5,hair3);P(15,21,4,5,hair3)}
+    else if(face==='left'){P(4,5,15,20,hair);P(3,9,4,15,hair2);P(16,9,5,16,hair2);P(5,21,5,5,hair3)}
+    else if(face==='right'){P(5,5,15,20,hair);P(3,9,5,16,hair2);P(18,9,4,15,hair2);P(14,21,5,5,hair3)}
+    else {P(4,5,16,20,hair);P(3,9,4,15,hair2);P(18,9,4,15,hair2);P(5,21,4,5,hair3);P(15,21,4,5,hair3)}
   }
 
-  // black pants with walking frame
-  if(fr%2===0){P(5,18,3,4,pants);P(10,18,3,4,pants);P(4,21,4,2,shoe);P(10,21,4,2,shoe)}
-  else {P(4,18,3,4,pants);P(11,18,3,4,pants);P(3,21,4,2,shoe);P(11,21,4,2,shoe)}
-  P(4,23,4,1,sole);P(10,23,4,1,sole);
+  // ears / face block
+  if(face==='up'){
+    P(6,5,12,10,skinSh);
+  }else{
+    P(6,5,12,11,skin);
+    P(5,9,2,5,skinSh); P(17,9,2,5,skinSh);
+  }
 
-  // tiny hoodie emblem — abstract, not a brand logo
-  if(face==='down'){P(8,15,2,2,'#46514c');P(9,14,1,1,'#46514c')}
+  // high-density mash / long hair crown
+  if(gender==='male'){
+    P(5,3,14,5,hair);P(4,5,16,5,hair);P(5,2,5,2,hair2);P(10,1,7,3,hair2);P(16,3,4,3,hair2);
+    if(face==='up'){P(5,8,14,6,hair);P(4,9,3,5,hair2);P(17,9,3,5,hair2)}
+    else{
+      P(4,7,4,7,hair);P(16,7,4,7,hair);
+      // irregular mash fringe
+      if(face==='down'){P(6,7,3,4,hair2);P(9,6,3,5,hair);P(12,7,3,4,hair2);P(15,6,2,4,hair)}
+      if(face==='left'){P(5,6,5,6,hair2);P(9,6,5,4,hair);P(15,7,3,5,hair)}
+      if(face==='right'){P(14,6,5,6,hair2);P(10,6,5,4,hair);P(6,7,3,5,hair)}
+    }
+  }else{
+    P(5,3,14,5,hair);P(4,5,16,5,hair);P(7,2,10,2,hair2);
+    if(face==='up'){P(5,7,14,8,hair);P(4,9,3,9,hair2);P(17,9,3,9,hair2)}
+    else{
+      P(4,7,4,12,hair);P(16,7,4,12,hair);P(6,6,4,5,hair2);P(10,5,4,5,hair);P(14,6,3,5,hair2);
+      P(3,12,3,10,hair2);P(18,12,3,10,hair2);
+    }
+  }
+
+  // face details
+  if(face==='down'){
+    P(8,11,2,2,eye);P(14,11,2,2,eye);P(9,10,1,1,'#fff');P(15,10,1,1,'#fff');
+    P(11,14,2,1,skinSh);P(7,14,2,1,'#e5a09b');P(15,14,2,1,'#e5a09b');
+  }else if(face==='left'){
+    P(7,11,2,2,eye);P(8,10,1,1,'#fff');P(6,14,2,1,'#e5a09b');
+  }else if(face==='right'){
+    P(15,11,2,2,eye);P(15,10,1,1,'#fff');P(16,14,2,1,'#e5a09b');
+  }
+
+  // hoodie silhouette
+  P(5,16,14,10,ink);
+  P(6,16,12,9,hoodie);
+  P(7,16,10,3,hoodieHi);
+  P(4,18,3,7,hoodieSh);P(17,18,3,7,hoodieSh);
+  // hood volume / seams
+  if(face==='up'){
+    P(7,16,10,4,hoodieSh);P(8,16,8,3,hoodieHi);P(10,17,4,3,hoodie);
+  }else{
+    P(7,17,2,2,hoodieHi);P(15,17,2,2,hoodieHi);
+    if(face==='down'){P(10,18,1,4,'#4b504d');P(13,18,1,4,'#4b504d');P(11,20,3,3,'#4d5752');P(12,19,1,1,hoodieHi)}
+  }
+  // cuffs / hands
+  if(face!=='up'){P(4,23,3,2,hoodieHi);P(17,23,3,2,hoodieHi);P(5,25,2,2,skin);P(17,25,2,2,skin)}
+
+  // pants + 3-frame walk impression
+  if(step===0){
+    P(7,25,4,5,pants);P(13,25,4,5,pants);P(7,26,3,2,pantsHi);P(13,26,3,2,pantsHi);
+    P(6,29,6,2,shoe);P(12,29,6,2,shoe);
+  }else if(fr===1){
+    P(6,25,4,5,pants);P(14,25,4,4,pants);P(5,29,6,2,shoe);P(14,28,6,2,shoe);
+  }else{
+    P(7,25,4,4,pants);P(13,25,4,5,pants);P(6,28,6,2,shoe);P(13,29,6,2,shoe);
+  }
+  P(6,31,6,1,sole);P(12,31,6,1,sole);
 }
-
 function drawWorld(now){
  const m=MAPS[state.scene];if(!bgCache.has(m.id))bgCache.set(m.id,buildMapCache(m));
  const target=cameraTarget();camera.x+=(target.x-camera.x)*.24;camera.y+=(target.y-camera.y)*.24;const ox=Math.round(camera.x),oy=Math.round(camera.y);
@@ -281,7 +317,7 @@ function drawWorld(now){
  if(tween){const k=clamp((now-tween.start)/tween.duration,0,1);const q=state.settings.reducedMotion?1:Math.floor(k*6)/6;px=tween.x+(tween.nx-tween.x)*q;py=tween.y+(tween.ny-tween.y)*q;fr=k<.85?walkFrame:0;}
  const arr=m.objects.filter(o=>o.depth!==-1).map(o=>({depth:o.depth??(o.y+(o.h||images[o.key]?.height||16)),draw:()=>stamp(wc,o.key,o.x+(o.ox||0)-ox,o.y+(o.oy||0)-oy,o.w,o.h)}));
  for(const n of m.npcs){arr.push({depth:(n.y+1)*T,draw:()=>stamp(wc,`${n.role}-${n.face||'down'}-0`,n.x*T-1-ox,n.y*T-10-oy,18,26)});}
- arr.push({depth:(py+1)*T,draw:()=>{drawPlayerSprite(wc,px*T-1-ox,py*T-10-oy,state.player.face,fr,state.player.gender||'male');if(m.tiles[state.player.y]?.[state.player.x]==='tall'){wc.fillStyle='#4b975b';wc.fillRect(px*T-ox,py*T+12-oy,16,3);wc.fillStyle='#95c581';for(let i=0;i<4;i++)wc.fillRect(px*T+i*4-ox,py*T+10-oy+(i%2),2,3)}}});
+ arr.push({depth:(py+1)*T,draw:()=>{drawPlayerSprite(wc,px*T-4-ox,py*T-18-oy,state.player.face,fr,state.player.gender||'male');if(m.tiles[state.player.y]?.[state.player.x]==='tall'){wc.fillStyle='#4b975b';wc.fillRect(px*T-ox,py*T+12-oy,16,3);wc.fillStyle='#95c581';for(let i=0;i<4;i++)wc.fillRect(px*T+i*4-ox,py*T+10-oy+(i%2),2,3)}}});
  arr.sort((a,b)=>a.depth-b.depth);for(const o of arr)o.draw();
  if(m.dark){wc.fillStyle='#101e3530';wc.fillRect(0,0,VIEW_W,VIEW_H);for(const o of m.objects.filter(o=>o.key==='torch')){const x=o.x+8-ox,y=o.y-5-oy;wc.fillStyle=now%600<300?'#f8d18b18':'#f8d18b10';wc.fillRect(x-17,y-19,34,38);}}
  // A small non-obstructing indication over the professor.
